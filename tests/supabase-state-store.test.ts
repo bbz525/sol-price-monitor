@@ -16,7 +16,7 @@ function createStore(client: unknown) {
 }
 
 describe("supabase state store", () => {
-  it("upserts monitor config", async () => {
+  it("inserts initial monitor config without overwriting existing settings", async () => {
     const upsert = vi.fn().mockResolvedValue({ error: null });
     const client = {
       from: vi.fn(() => ({ upsert })),
@@ -30,7 +30,7 @@ describe("supabase state store", () => {
         symbol: "SOLUSDT",
         threshold_price: 120,
       }),
-      { onConflict: "symbol" },
+      { onConflict: "symbol", ignoreDuplicates: true },
     );
   });
 

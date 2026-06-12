@@ -39,7 +39,7 @@ export class SupabaseStateStore {
         alert_channel: "feishu",
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "symbol" },
+      { onConflict: "symbol", ignoreDuplicates: true },
     );
 
     if (error) {

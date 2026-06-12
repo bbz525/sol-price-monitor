@@ -4,23 +4,31 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "next dev",
+    "dev:worker": "tsx src/index.ts",
     "dev:webhook": "tsx src/deploy-webhook.ts",
     "start": "node dist/index.js",
     "start:webhook": "node dist/deploy-webhook.js",
     "build": "tsc -p tsconfig.build.json",
+    "build:web": "next build",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",
     "dotenv": "^17.2.3",
+    "lucide-react": "^1.17.0",
+    "next": "^16.2.9",
     "pino": "^10.1.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "ws": "^8.18.3",
     "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",

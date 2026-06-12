@@ -20,9 +20,11 @@ BINANCE_WS_BASE_URL=wss://data-stream.binance.vision/ws
 PRICE_STREAM=miniTicker
 WORKER_ID=remote-worker-1
 STALE_MESSAGE_SECONDS=90
+ADMIN_TOKEN=...
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` 和 `FEISHU_APP_SECRET` 必须只放在远程平台的 secret/env 管理里，不要提交到 Git。
+`ADMIN_TOKEN` 用于保护 Vercel 配置页面的 API，建议使用 32 字节以上随机值。
 
 `BINANCE_WS_BASE_URL` 推荐使用 `wss://data-stream.binance.vision/ws`。在腾讯云上海轻量服务器实测，`wss://stream.binance.com:9443/ws` 可能反复以 `1006` 关闭连接；切换到 market-data-only endpoint 后可以稳定收到 `SOLUSDT` miniTicker。
 

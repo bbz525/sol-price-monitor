@@ -41,7 +41,7 @@ const envSchema = z.object({
 
 export type AppConfig = ReturnType<typeof loadConfig>;
 
-export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
+export function loadConfig(env: Record<string, string | undefined> = process.env) {
   const parsed = envSchema.parse(env);
   const symbol = parsed.SYMBOL.toUpperCase();
   const streamName = `${symbol.toLowerCase()}@${parsed.PRICE_STREAM}`;

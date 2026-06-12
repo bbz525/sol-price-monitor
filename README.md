@@ -100,6 +100,24 @@ FEISHU_RECEIVE_ID=ou_xxx
 
 Vercel 适合后续托管 dashboard，不适合作为 30 秒或实时 WebSocket 监听进程。
 
+## 配置页面
+
+项目包含一个 Next.js 配置页面，用来查看当前价格、Worker 状态、最近告警，并修改 `SOLUSDT` 阈值和启停状态。
+
+```bash
+npm run dev
+```
+
+页面 API 使用 `SUPABASE_SERVICE_ROLE_KEY` 在服务端访问 Supabase，不会把 key 暴露到浏览器。生产环境需要配置：
+
+```text
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+ADMIN_TOKEN=...
+```
+
+`ADMIN_TOKEN` 填在页面的“管理令牌”输入框中。修改阈值后，Worker 下一次收到价格 tick 会从 Supabase 配置读取新阈值。
+
 远程部署见：
 
 ```text

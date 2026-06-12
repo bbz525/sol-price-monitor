@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}"
+
 APP_DIR="${APP_DIR:-/opt/sol-price-monitor}"
 REPO_URL="${REPO_URL:-https://github.com/bbz525/sol-price-monitor.git}"
 BRANCH="${BRANCH:-main}"

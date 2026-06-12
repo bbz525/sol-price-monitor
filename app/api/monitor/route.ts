@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminSupabase, assertAdminToken } from "../../../web/admin-supabase.js";
+import { getAdminSupabase, assertAdminToken } from "../../../web/admin-supabase.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     return unauthorized;
   }
 
+  const adminSupabase = getAdminSupabase();
   const { data: configs, error: configError } = await adminSupabase
     .from("price_monitor_configs")
     .select("symbol, threshold_price, quote_asset, enabled, alert_channel, updated_at")
@@ -53,6 +54,7 @@ export async function PUT(request: Request) {
     return unauthorized;
   }
 
+  const adminSupabase = getAdminSupabase();
   const parsed = configInput.safeParse(await request.json());
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0]?.message ?? "invalid input" }, { status: 400 });

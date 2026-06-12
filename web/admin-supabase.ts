@@ -8,27 +8,35 @@ const envSchema = z.object({
   NODE_ENV: z.string().optional(),
 });
 
-export const dashboardEnv = envSchema.parse({
-  SUPABASE_URL: process.env.SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  ADMIN_TOKEN: process.env.ADMIN_TOKEN,
-  NODE_ENV: process.env.NODE_ENV,
-});
+export type DashboardEnv = z.infer<typeof envSchema>;
 
-export const adminSupabase = createClient(dashboardEnv.SUPABASE_URL, dashboardEnv.SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false },
-});
+export function getDashboardEnv(): DashboardEnv {
+  return envSchema.parse({
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    ADMIN_TOKEN: process.env.ADMIN_TOKEN,
+    NODE_ENV: process.env.NODE_ENV,
+  });
+}
+
+export function getAdminSupabase() {
+  const env = getDashboardEnv();
+  return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false },
+  });
+}
 
 export function assertAdminToken(request: Request): Response | null {
-  if (!dashboardEnv.ADMIN_TOKEN) {
-    if (dashboardEnv.NODE_ENV === "production") {
+  const env = getDashboardEnv();
+  if (!env.ADMIN_TOKEN) {
+    if (env.NODE_ENV === "production") {
       return Response.json({ error: "ADMIN_TOKEN is not configured" }, { status: 503 });
     }
     return null;
   }
 
   const headerToken = request.headers.get("x-admin-token")?.trim();
-  if (headerToken === dashboardEnv.ADMIN_TOKEN) {
+  if (headerToken === env.ADMIN_TOKEN) {
     return null;
   }
 

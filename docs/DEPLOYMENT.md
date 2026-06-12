@@ -184,7 +184,10 @@ DEPLOY_WEBHOOK_PATH=/github/sol-monitor/deploy
 GITHUB_WEBHOOK_SECRET=...
 DEPLOY_BRANCH_REF=refs/heads/main
 DEPLOY_COMMAND=/opt/sol-price-monitor/scripts/deploy-from-github.sh
+REPO_URL=https://gh-proxy.com/https://github.com/bbz525/sol-price-monitor.git
 ```
+
+`REPO_URL` 默认可以使用 GitHub 原始地址。腾讯云上海实例实测直连 `github.com` 可能卡在 `git fetch`，因此生产环境使用上面的 GitHub 代理地址。
 
 创建 `/etc/systemd/system/sol-price-monitor-webhook.service`：
 
@@ -240,7 +243,10 @@ systemctl is-active sol-price-monitor-webhook
 journalctl -u sol-price-monitor-webhook --since "2 minutes ago" --no-pager
 nginx -t
 nginx -s reload
+curl -i -X POST http://127.0.0.1/github/sol-monitor/deploy
 ```
+
+未签名的 `curl` 应返回 `401 invalid_signature`；GitHub webhook ping 应返回 `200`。
 
 ## 验证
 

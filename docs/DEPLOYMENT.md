@@ -128,6 +128,43 @@ journalctl -u sol-price-monitor --since "2 minutes ago" --no-pager
 
 正常日志应包含 `starting price monitor`、`binance_connected` 和持续的 `price tick recorded`。
 
+### 后续从 GitHub 更新
+
+仓库地址：
+
+```text
+https://github.com/bbz525/sol-price-monitor
+```
+
+服务器第一次切换到 GitHub 工作流时，建议先备份生产 `.env`，再用 GitHub 代码覆盖应用目录：
+
+```bash
+cd /opt/sol-price-monitor
+cp .env /root/sol-price-monitor.env.backup
+git init
+git remote add origin https://github.com/bbz525/sol-price-monitor.git
+git fetch origin main
+git reset --hard origin/main
+cp /root/sol-price-monitor.env.backup .env
+chmod 600 .env
+npm ci
+npm run build
+systemctl restart sol-price-monitor
+systemctl is-active sol-price-monitor
+journalctl -u sol-price-monitor --since "2 minutes ago" --no-pager
+```
+
+后续每次更新：
+
+```bash
+cd /opt/sol-price-monitor
+git pull --ff-only
+npm ci
+npm run build
+systemctl restart sol-price-monitor
+journalctl -u sol-price-monitor --since "2 minutes ago" --no-pager
+```
+
 ## 验证
 
 部署后检查三件事：

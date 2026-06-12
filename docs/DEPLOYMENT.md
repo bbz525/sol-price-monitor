@@ -136,7 +136,9 @@ journalctl -u sol-price-monitor --since "2 minutes ago" --no-pager
 https://github.com/bbz525/sol-price-monitor
 ```
 
-服务器第一次切换到 GitHub 工作流时，建议先备份生产 `.env`，再用 GitHub 代码覆盖应用目录：
+服务器第一次切换到 GitHub 工作流时，建议先备份生产 `.env`，再用 GitHub 代码覆盖应用目录。
+
+如果仓库保持 private，服务器需要配置 GitHub deploy key；如果仓库为 public，服务器可以直接用 HTTPS 拉取。
 
 ```bash
 cd /opt/sol-price-monitor
@@ -163,6 +165,81 @@ npm ci
 npm run build
 systemctl restart sol-price-monitor
 journalctl -u sol-price-monitor --since "2 minutes ago" --no-pager
+```
+
+## GitHub Webhook + Nginx 反代 CD
+
+如果不希望开放公网 SSH，可以把部署入口通过 Nginx 代理出来：
+
+```text
+GitHub push webhook -> Nginx -> 127.0.0.1:3100 -> deploy webhook -> git fetch/reset -> build -> systemd restart
+```
+
+生产环境变量写入 `/opt/sol-price-monitor/deploy-webhook.env`：
+
+```text
+DEPLOY_WEBHOOK_HOST=127.0.0.1
+DEPLOY_WEBHOOK_PORT=3100
+DEPLOY_WEBHOOK_PATH=/github/sol-monitor/deploy
+GITHUB_WEBHOOK_SECRET=...
+DEPLOY_BRANCH_REF=refs/heads/main
+DEPLOY_COMMAND=/opt/sol-price-monitor/scripts/deploy-from-github.sh
+```
+
+创建 `/etc/systemd/system/sol-price-monitor-webhook.service`：
+
+```ini
+[Unit]
+Description=SOL price monitor GitHub deploy webhook
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/sol-price-monitor
+EnvironmentFile=/opt/sol-price-monitor/deploy-webhook.env
+ExecStart=/usr/bin/node /opt/sol-price-monitor/dist/deploy-webhook.js
+Restart=always
+RestartSec=10
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Nginx 反代 location：
+
+```nginx
+location = /github/sol-monitor/deploy {
+    proxy_pass http://127.0.0.1:3100/github/sol-monitor/deploy;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+GitHub 仓库 Webhook：
+
+```text
+Payload URL: http://<server-ip-or-domain>/github/sol-monitor/deploy
+Content type: application/json
+Secret: 与 GITHUB_WEBHOOK_SECRET 相同
+Events: Just the push event
+```
+
+验证：
+
+```bash
+systemctl daemon-reload
+systemctl enable --now sol-price-monitor-webhook
+systemctl is-active sol-price-monitor-webhook
+journalctl -u sol-price-monitor-webhook --since "2 minutes ago" --no-pager
+nginx -t
+nginx -s reload
 ```
 
 ## 验证

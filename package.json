@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
+    "dev:webhook": "tsx src/deploy-webhook.ts",
     "start": "node dist/index.js",
+    "start:webhook": "node dist/deploy-webhook.js",
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
